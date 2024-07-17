@@ -1,0 +1,55 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+#Place Vagrantfile in the directory you run vagrant from.
+#This should also contain ubuntu.yml which configure VMs
+
+# setting for all VMs
+Vagrant.configure("2") do |config|
+  config.vm.box = "ubuntu/focal64"
+  config.vm.provision "ansible_local", playbook: "ubuntu.yml"
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 1024
+    v.cpus = 2
+  end
+  
+  # specific for main server
+  config.vm.define "main" do |main|
+    main.vm.hostname = "main-server"
+    main.vm.network "private_network", ip: "192.168.56.100"
+	main.vm.provider "virtualbox" do |mainv|
+	  mainv.memory = 2048
+	  mainv.cpus = 2
+	end
+  end
+  
+
+  # specific for control1
+  config.vm.define "control1" do |control1|
+    control1.vm.hostname = "control1"
+    control1.vm.network "private_network", ip: "192.168.56.101"
+	control1.vm.network "forwarded_port", guest: 22, host: 2401
+  end
+
+  # specific for control2
+  config.vm.define "control2" do |control2|
+    control2.vm.hostname = "control2"
+    control2.vm.network "private_network", ip: "192.168.56.102"
+	control2.vm.network "forwarded_port", guest: 22, host: 2402
+  end
+  
+  # specific for worker1
+  config.vm.define "worker1" do |worker1|
+    worker1.vm.hostname = "worker1.mylabserver.com"
+    worker1.vm.network "private_network", ip: "192.168.56.103"
+	worker1.vm.network "forwarded_port", guest: 22, host: 2301
+  end
+  
+  # specific for worker2
+  config.vm.define "worker2" do |worker2|
+    worker2.vm.hostname = "worker2.mylabserver.com"
+    worker2.vm.network "private_network", ip: "192.168.56.104"
+	worker2.vm.network "forwarded_port", guest: 22, host: 2302
+  end
+  
+end
